@@ -4,11 +4,19 @@ const path = require('node:path')
 // Ejercicio 2
 async function writeFile (filePath, data, callback) {
   const folderPath = path.join(__dirname, filePath)
-  const completePath = path.join(folderPath, 'testfile.txt')
 
-  await fs.mkdir(folderPath, { recursive: true })
+  try {
+    await fs.mkdir(folderPath, { recursive: true })
+  } catch(err) {
+    return callback(err)
+  }
 
-  await fs.writeFile(completePath, data)
+  try {
+    await fs.writeFile(`${filePath}.txt`, data)
+  } catch(err) {
+    return callback(err)
+  }
+
   callback()
 }
 
@@ -17,13 +25,12 @@ async function readFileAndCount (word, callback) {
   if (!word) {
     return callback(new Error('No se ha especificado la palabra a buscar'))
   }
-  word = word.toLocaleLowerCase()
 
   const filePath = process.argv[2]
   if (!filePath) {
-    return callback(new Error('No se ha especificado el path del archivo'), 0)
+    return callback(new Error('No se ha especificado el path del archivo'))
   }
-
+  
   const completePath = path.join(__dirname, filePath)
   let fileContent = ''
 
@@ -35,8 +42,10 @@ async function readFileAndCount (word, callback) {
   }
 
   const words = fileContent.split(' ')
+  const lowerWord = word.toLocaleLowerCase()
+  
   const amount = words.filter(w => {
-    return w.toLocaleLowerCase().includes(word)
+    return w.toLocaleLowerCase().includes(lowerWord)
   }).length
 
   return callback(null, amount)
